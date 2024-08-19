@@ -1,3 +1,5 @@
+use rand::Rng;
+
 pub struct Synapse {
     pub weight: f64,
     pub layer_from: u8,
@@ -15,5 +17,9 @@ impl Synapse {
             layer_to,
             index_to,
         }
+    }
+    pub fn mutate(&mut self) {
+        let mutation: f64 = rand::thread_rng().gen_range(-0.5..0.5);
+        self.weight = self.weight + mutation;
     }
 }

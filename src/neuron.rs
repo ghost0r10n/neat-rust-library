@@ -1,3 +1,5 @@
+use rand::Rng;
+
 #[derive(Clone)]
 pub enum NeuronType {
     Input,
@@ -22,5 +24,10 @@ impl Neuron {
             activation,
         }
     }
+
+    pub fn mutate(&mut self) {
+        self.bias = rand::thread_rng().gen_range(0.0..1.0);
+    }
+
     // Activate the neuron
 }

@@ -1,4 +1,4 @@
-use core::f64;
+use std::usize;
 
 use rand::{thread_rng, Rng};
 use wasm_bindgen::JsValue;
@@ -23,6 +23,38 @@ impl Network {
         }
     }
 
+    pub fn mutate_random_bias(&mut self) {
+        let layers_size: u8 = self.layers.len() as u8;
+        let layer_index: usize = rand::thread_rng().gen_range(1..layers_size - 1) as usize;
+        let layer_node_size = match self.layers.get(layer_index) {
+            Some(layer) => layer.neurons.len(),
+            None => 0,
+        };
+        assert!(layer_node_size == 0);
+        let size_change: usize = rand::thread_rng().gen_range(0..layer_node_size) as usize;
+        if size_change == 0 {
+            return;
+        }
+        for _i in 0..size_change {
+            let random_neuron_index: usize =
+                rand::thread_rng().gen_range(0..layer_node_size) as usize;
+            self.layers[layer_index].neurons[random_neuron_index].mutate();
+        }
+    }
+
+    pub fn mutate_synapse(&mut self) {
+        let size_synapses: usize = self.synapses.len();
+        assert!(size_synapses == 0);
+        let size_change: usize = rand::thread_rng().gen_range(0..size_synapses) as usize;
+        if size_change == 0 {
+            return;
+        }
+        for _i in 0..size_change {
+            let random_synaps_index: usize = rand::thread_rng().gen_range(0..size_synapses);
+            self.synapses[random_synaps_index].mutate()
+        }
+    }
+
     pub fn add_layer(&mut self, layer: NeuronLayer) {
         self.layers.push(layer);
     }
@@ -32,17 +64,9 @@ impl Network {
     pub fn add_random_synapses(&mut self) {
         let layer_from = rand::thread_rng().gen_range(0..self.layers.len() - 1) as usize;
         let layer_to = rand::thread_rng().gen_range(1..self.layers.len()) as usize;
-        console::log_1(&format!("Layer from: {}, Layer to: {}", layer_from as u8, layer_to).into());
         let from = rand::thread_rng().gen_range(0..self.layers[layer_from].neurons.len()) as usize;
         let to = rand::thread_rng().gen_range(0..self.layers[layer_to].neurons.len()) as usize;
         let weight = rand::thread_rng().gen_range(-1.0..1.0);
-        console::log_1(
-            &format!(
-                "Layer from: {}, Layer to: {}, From: {}, To: {}, Weight: {}",
-                layer_from as u8, layer_to as u8, from as u8, to as u8, weight
-            )
-            .into(),
-        );
         self.add_synapses(Synapse::new(
             weight,
             layer_from as u8,
@@ -54,7 +78,6 @@ impl Network {
 
     pub fn add_random_neuron(&mut self) {
         let decision_maker = thread_rng().gen_range(0.0..1.0) as f64;
-        console::log_1(&format!("Decision maker: {}", decision_maker).into());
 
         let neuron = Neuron::new(NeuronType::Hidden, 0.0, random(), |x| {
             if x > 0.0 {
@@ -63,15 +86,7 @@ impl Network {
                 0.0
             }
         });
-        console::log_1(&format!("Neuron created").into());
         let hidden_layer_selection = thread_rng().gen_range(1..self.layers.len());
-        console::log_1(
-            &format!(
-                "Decision maker: {}, Hidden layer selection: {}",
-                decision_maker, hidden_layer_selection
-            )
-            .into(),
-        );
         if decision_maker < 0.5 || self.layers.len() == 2 {
             self.layers.insert(
                 hidden_layer_selection,
@@ -87,7 +102,6 @@ impl Network {
     pub fn draw_network(&self, context: &CanvasRenderingContext2d) {
         context.set_line_width(2.0);
         context.set_stroke_style(&JsValue::from_str("black"));
-        console::log_1(&format!("Current time: {}", self.synapses.len()).into());
         for c in 0..self.synapses.len() {
             context.begin_path();
             context.move_to(
