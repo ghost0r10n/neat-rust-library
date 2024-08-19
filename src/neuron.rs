@@ -29,5 +29,9 @@ impl Neuron {
         self.bias = rand::thread_rng().gen_range(0.0..1.0);
     }
 
+    pub fn set_value(&mut self, value: f64) {
+        self.value = value;
+    }
+
     // Activate the neuron
 }

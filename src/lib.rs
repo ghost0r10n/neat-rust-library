@@ -5,7 +5,6 @@ use neuron::Neuron;
 use neuron::NeuronType;
 use std::cell::RefCell;
 use std::rc::Rc;
-use synapse::Synapse;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{window, CanvasRenderingContext2d, HtmlCanvasElement};

@@ -23,6 +23,31 @@ impl Network {
         }
     }
 
+    pub fn feed_forward(&mut self, input: Vec<f64>) {
+        assert!(input.len() == self.layers[0].neurons.len());
+        self.sort_synapses_by_layer_from();
+        let mut current_layer: u8 = 0;
+        for i in 0..self.synapses.len() {
+            let synapse: Synapse = self.synapses[i].clone();
+            let mut neuron_from: Neuron = self.layers[synapse.layer_from as usize].neurons
+                [synapse.index_from as usize]
+                .clone();
+            let mut neuron_to: Neuron =
+                self.layers[synapse.layer_to as usize].neurons[synapse.index_to as usize].clone();
+            if synapse.layer_from == 0 {
+                neuron_from.set_value(input[synapse.index_from as usize]);
+            }
+            neuron_to.set_value((neuron_to.activation)(
+                synapse.weight * neuron_from.value + neuron_to.bias,
+            ));
+        }
+    }
+
+    fn sort_synapses_by_layer_from(&mut self) {
+        self.synapses
+            .sort_by(|a, b| a.layer_from.cmp(&b.layer_from));
+    }
+
     pub fn mutate_random_bias(&mut self) {
         let layers_size: u8 = self.layers.len() as u8;
         let layer_index: usize = rand::thread_rng().gen_range(1..layers_size - 1) as usize;

@@ -1,5 +1,6 @@
 use rand::Rng;
 
+#[derive(Debug, Clone)]
 pub struct Synapse {
     pub weight: f64,
     pub layer_from: u8,
